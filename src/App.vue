@@ -1,91 +1,91 @@
 <template>
-  <div>
-    <h1>Declarative Rendering</h1>
-    <p>{{ namaVariabel }}</p>
-    <p>{{ namaVariabel2 }}</p>
-    <p>{{ namaVariabel3 }}</p>
-    <p>{{ variabelReactive }}</p>
-    <p>{{ variabelReactive }}</p>
-
-    <hr style="border: 2px solid black">
-
-    <h1>Attribute Rendering</h1>
-    <p v-bind:class="styleParagraf">Hallo</p>
-    <h3 v-bind:class="styleParagraf">Hallo</h3>
-    <h5 v-bind:class="styleParagraf">Hallo</h5>
-
-    <hr style="border: 2px solid black">
-
-    <h1>Event Listener</h1>
-    <p>{{ data }}</p>
-    <button @click="increment">Tambah</button>
-    <button @click="decrement">Kurang</button>
-    <button @click="sayHi">Hi</button>
-
-    <hr style="border: 2px solid black">
-
-    <h1>Form Binding</h1>
-    <form action="">
-      <input type="text" v-model="username" placeholder="Tulis Username"><br>
-      <input type="password" v-model="password" placeholder="Tulis Password">
+  <div class="todo-app">
+    <form @submit.prevent="addTodo" class="todo-form">
+      <input v-model="newTodo" required placeholder="Masukkan TODO" class="todo-input">
+      <button type="submit" class="todo-button">Add Todo</button>
     </form>
-    <p>Hasil dari form : {{ username }} dan password {{ password }}</p>
 
-    <hr style="border: 2px solid black">
+    <ul class="todo-list">
+      <li v-for="todo in  filteredTodos" :key="todo.id" class="todo-item">
+        <input type="checkbox" v-model="todo.done">
+        <span :class="{ done: todo.done }">{{ todo.text }}</span>
+        <button @click="removeTodo(todo)" class="delete-button">X</button>
+      </li>
+    </ul>
 
-    <h1>Conditional Rendering</h1>
-    <p v-if="bandingData > 22">Ini nilainya Besar dari 22</p>
-    <p v-else-if="bandingData > 18 && bandingData < 22">Ini diantara 18 dan 22</p>
-    <p v-else>Ini nilainya default</p>
+    <button @click="hideCompleted = !hideCompleted" class="toggle-completed">
+      {{ hideCompleted ? 'Show all' : 'Hide completed' }}
+    </button>
 
+    <p>{{ pesan }}</p>
   </div>
 </template>
 
-<!-- vue 3 -->
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, computed, onUpdated, watch } from 'vue'
 
-const bandingData = ref(25)
+const pesan = ref("Inputan kosong")
 
-const username = ref("")
-const password = ref("")
-
-const data = ref(0)
-
-function increment() {
-  data.value++
-}
-
-function decrement() {
-  data.value--
-}
-
-function sayHi() {
-  alert("Hello there")
-}
-
-const styleParagraf = ref("paragraf")
-
-// ref bisa untuk semua tipe nilai, string,int, array, object, array object
-const namaVariabel = ref("hello ponijbugv")
-const namaVariabel2 = ref(1)
-const namaVariabel3 = ref([{
-  nama: "PBK",
-  kelas: "Praktikum"
-}])
-
-// reactive didesain untuk object, array object
-const variabelReactive = reactive({
-  nama: "PBK 2",
-  kelas: "Praktikum",
-  kode: 9
+onUpdated(() => {
+  console.log("Ada suatu perubahan terjadi di website")
 })
 
+let id = 0
+const newTodo = ref('')
+const hideCompleted = ref(false)
+
+watch(newTodo, (data) => {
+  if (!isNaN(data)) {
+    pesan.value = "Inputan gak boleh diisi dengan angka"
+  } else {
+    pesan.value = "Inputan diterima"
+  }
+})
+
+
+const todos = ref([
+  { id: id++, text: 'Learn HTML', done: true },
+  { id: id++, text: 'Learn CSS', done: false },
+  { id: id++, text: 'Learn JavaScript', done: true },
+  { id: id++, text: 'Learn Vue', done: false }
+])
+
+// Manipulasi Data/ array, object
+const filteredTodos = computed(() => {
+  return hideCompleted.value ? todos.value.filter((t) => !t.done) : todos.value
+})
+
+// Biasanya digunakan untuk button
+function addTodo() {
+  todos.value.push({ id: id++, text: newTodo.value, done: false })
+  newTodo.value = ''
+}
 </script>
 
-<style scoped>
-.paragraf {
-  font-size: 25px;
-  color: red;
+<style>
+.todo-input {
+  margin: 0 20px 5px 1px;
+  padding: 5px;
+}
+
+.todo-button {
+  color: white;
+  background-color: green;
+  padding: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.delete-button {
+  margin-left: 13px;
+  color: white;
+  background-color: red;
+  cursor: pointer;
+}
+
+.done {
+  text-decoration: line-through;
+  color: blue;
+
 }
 </style>
